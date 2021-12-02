@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using static System.Console;
 using static Utils.InputLoader;
 
-IEnumerable<(Direction direction, int speed)> actions = Load<Direction, int>();
-
 // Part 1
+// IEnumerable<(Direction direction, int speed)> actions = Load<Direction, int>();
 // List<(Direction direction, int totalSpeed)> totalSpeeds = actions.GroupBy(item => item.direction).Select(item => (item.Key, item.Sum(item => item.speed))).ToList();
 // var multipliedResult = totalSpeeds.First(item => item.direction == Direction.Forward).totalSpeed
 //                      * (totalSpeeds.First(item => item.direction == Direction.Down).totalSpeed
 //                         - totalSpeeds.First(item => item.direction == Direction.Up).totalSpeed);
 //
 // WriteLine(multipliedResult);
+
+IEnumerable<(Direction direction, int speed)> actions = Load<(Direction, int)>();
 
 int aim = 0;
 int depth = 0;

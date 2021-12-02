@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Utils
 {
@@ -9,7 +11,7 @@ namespace Utils
     {
         public static IEnumerable<string> Load(string index = "0")
         {
-            return File.ReadAllLines($"./Input/input{index}.txt");
+            return File.ReadLines($"./Input/input{index}.txt");
         }
 
         private static IEnumerable<string[]> LoadAndSplit(string index)
@@ -18,45 +20,32 @@ namespace Utils
         }
 
         // Playing around with generic parsing
-        public static IEnumerable<(T1, T2)> Load<T1, T2>(string index = "0")
+        public static IEnumerable<T> Load<T>(string index = "0") where T : ITuple
         {
-            return LoadAndSplit(index).Select(ConvertType<T1, T2>);
+            return LoadAndSplit(index).Select(ConvertType<T>);
         }
 
-        public static IEnumerable<(T1, T2, T3)> Load<T1, T2, T3>(string index = "0")
+        private static T ConvertType<T>(string[] values)
+                where T : ITuple
         {
-            return LoadAndSplit(index).Select(ConvertType<T1, T2, T3>);
-        }
-
-        public static IEnumerable<(T1, T2, T3, T4)> Load<T1, T2, T3, T4>(string index = "0")
-        {
-            return LoadAndSplit(index).Select(ConvertType<T1, T2, T3, T4>);
-        }
-
-        private static T ConvertType<T>(string value)
-        {
-            if (typeof(T).IsEnum) {
-                return (T)Enum.Parse(typeof(T), value, true);
+            object result = Activator.CreateInstance(typeof(T));
+            for (int i = 0; i < values.Length; i++)
+            {
+                var fieldInfo = typeof(T).GetField("Item" + (i + 1));
+                fieldInfo?.SetValue(result, ConvertValue(values[i], fieldInfo.FieldType));
             }
 
-            return (T)Convert.ChangeType(value, typeof(T));
+            return (T)result;
         }
 
-        private static (T1, T2) ConvertType<T1, T2>(string[] splitList)
+        private static object ConvertValue(string value, Type type)
         {
-            return (ConvertType<T1>(splitList[0]), ConvertType<T2>(splitList[1]));
-        }
+            if (type.IsEnum)
+            {
+                return Enum.Parse(type, value, true);
+            }
 
-        private static (T1, T2, T3) ConvertType<T1, T2, T3>(string[] splitList)
-        {
-            (T1, T2) firstPart = ConvertType<T1, T2>(splitList);
-            return (firstPart.Item1, firstPart.Item2, ConvertType<T3>(splitList.Skip(2).First()));
-        }
-
-        private static (T1, T2, T3, T4) ConvertType<T1, T2, T3, T4>(string[] splitList)
-        {
-            (T1, T2, T3) firstPart = ConvertType<T1, T2, T3>(splitList);
-            return (firstPart.Item1, firstPart.Item2, firstPart.Item3, ConvertType<T4>(splitList.Skip(3).First()));
+            return Convert.ChangeType(value, type);
         }
     }
 }
