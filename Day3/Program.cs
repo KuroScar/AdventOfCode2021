@@ -15,24 +15,23 @@ SolvePart2(Load().ToList());
 
 void SolvePart2(List<string> lines)
 {
-    string oxyValue = SearchValue(lines.ToList(), false);
-    string co2Value = SearchValue(lines.ToList(), true);
+    string oxyValue = SearchValue(lines.ToList(), true);
+    string co2Value = SearchValue(lines.ToList(), false);
 
     Console.WriteLine(oxyValue);
     Console.WriteLine(co2Value);
     Console.WriteLine(Convert.ToInt32(oxyValue, 2) * Convert.ToInt32(co2Value, 2));
 }
 
-string SearchValue(List<string> searchSpace, bool descending)
+string SearchValue(List<string> searchSpace, bool searchForCommon)
 {
     int binaryLength = searchSpace.First().Length;
     for (int i = 0; i < binaryLength; i++)
     {
-        IEnumerable<IGrouping<char,string>> groupBy = searchSpace.GroupBy(item => item[i]);
-
-        var ordered = descending ?
-                              groupBy.OrderBy(item => item.Count()).ThenBy(item => item.Key) :
-                              groupBy.OrderByDescending(item => item.Count()).ThenByDescending(item => item.Key);
+        var grouped = searchSpace.GroupBy(item => item[i]);
+        var ordered = searchForCommon ?
+                              grouped.OrderByDescending(item => item.Count()).ThenByDescending(item => item.Key) :
+                              grouped.OrderBy(item => item.Count()).ThenBy(item => item.Key);
 
         searchSpace = ordered.First().Select(item => item).ToList();
         if (searchSpace.Count == 1)
