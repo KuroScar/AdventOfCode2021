@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using MoreLinq;
+
 public class BingoBoard
 {
     private BingoNumber[][] BoardByRows { get; }
@@ -16,12 +18,9 @@ public class BingoBoard
 
     public void NewNumber(string number)
     {
-        BingoNumber bingoNumber = BoardByRows.SelectMany(item => item).FirstOrDefault(item => item.Number == number);
-        if (bingoNumber == null)
-        {
-            return;
-        }
-        bingoNumber.Marked = true;
+        BoardByRows.SelectMany(item => item)
+                   .Where(item => item.Number == number)
+                   .ForEach(item => item.Marked = true);
     }
 
     public bool HasWon()
@@ -33,7 +32,7 @@ public class BingoBoard
     public IEnumerable<string> GetAllUnmarkedNumbers => BoardByRows.SelectMany(item => item)
                                                                    .Where(item => !item.Marked)
                                                                    .Select(item => item.Number);
-    private IEnumerable<IEnumerable<BingoNumber>> BoardByColumns => Enumerable.Range(0, BoardByRows.First().Length)
+    private IEnumerable<IEnumerable<BingoNumber>> BoardByColumns => Enumerable.Range(0, BoardByRows.Length)
                                                                               .Select(index => BoardByRows.Select(row => row[index]));
 
     record BingoNumber
